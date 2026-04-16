@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 // Load Google Fonts
 const loadFonts = () => {
@@ -18,6 +18,12 @@ const T = {
 
 const MONO = { fontFamily: "'IBM Plex Mono','JetBrains Mono',monospace" };
 const SANS = { fontFamily: "'Outfit',sans-serif" };
+
+function scrollToId(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function SectionNum({ n, label }) {
   return (
@@ -86,29 +92,49 @@ function HeroSection() {
         <span style={{ ...MONO, fontSize: 9, color: T.dim, marginLeft: "auto" }}>CHL-03 · LIVE</span>
       </div>
 
-      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 24 }}>MILVIAN GROUP · PLATFORM</div>
+      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 18 }}>HVAC AI DASHBOARD · DEMO</div>
 
       <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.06, margin: "0 0 18px", letterSpacing: -2, maxWidth: 820 }}>
-        Active<br />
-        <span style={{ color: T.amber }}>facility</span><br />
-        intelligence.
+        Active vs reactive<br />
+        <span style={{ color: T.amber }}>dashboards</span><br />
+        (and where AI helps)
       </h1>
 
       <p style={{ fontSize: 18, color: T.muted, lineHeight: 1.65, maxWidth: 660, margin: "0 0 26px", fontWeight: 300 }}>
-        Turn live HVAC telemetry into <span style={{ color: T.text }}>decisions</span>: detect drift early, explain the “why”, and recommend the next action in plain English.
+        This is a guided walkthrough I use in conversation. We’ll start with the hypothesis, then the KPIs + assumptions behind this demo system, then jump into deeper analysis mode.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, maxWidth: 860, marginBottom: 26 }}>
-        {[
-          { t: "Early warning", d: "Spot deviation before alarms trip." },
-          { t: "Root-cause in minutes", d: "Hypotheses + evidence, not guesswork." },
-          { t: "Anyone can use it", d: "Operators, techs, owners—same interface." },
-        ].map((c) => (
-          <div key={c.t} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 14px" }}>
-            <div style={{ fontSize: 13, fontWeight: 750, marginBottom: 6 }}>{c.t}</div>
-            <div style={{ fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{c.d}</div>
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 14, maxWidth: 860, marginBottom: 22 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ ...MONO, fontSize: 10, color: T.dim, letterSpacing: 2 }}>DEMO FLOW</span>
+            <span style={{ fontSize: 12, color: T.muted }}>3 minutes · 3 sections</span>
           </div>
-        ))}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {[
+              { id: "shift", label: "01 HYPOTHESIS" },
+              { id: "setup", label: "02 KPIs + ASSUMPTIONS" },
+              { id: "deep-dive", label: "03 DEEPER ANALYSIS" },
+            ].map((b) => (
+              <button
+                key={b.id}
+                onClick={() => scrollToId(b.id)}
+                style={{
+                  ...MONO,
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${T.border}`,
+                  background: "#ffffff",
+                  cursor: "pointer",
+                }}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -150,11 +176,11 @@ function ActiveVsReactiveSection() {
   );
 
   return (
-    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+    <section id="shift" style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
       <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
-        Watching vs <span style={{ color: T.amber }}>understanding</span>
+        The hypothesis: from <span style={{ color: T.amber }}>reactive</span> to active
       </h2>
-      <GoalLine>Make the difference obvious: alarms + experts vs continuous detection + guided action.</GoalLine>
+      <GoalLine>Reactive dashboards report what happened. Active dashboards detect drift early, explain why, and guide the next action.</GoalLine>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 16 }}>
@@ -225,10 +251,51 @@ function ActiveVsReactiveSection() {
   );
 }
 
+// ── KPI + ASSUMPTIONS ──────────────────────────────────────────────────────────
+function DemoAssumptionsSection() {
+  const items = [
+    { t: "System scope", d: "One demo chiller (CHL-03) with two water loops + AHU + cooling tower context." },
+    { t: "Sampling", d: "1 tick per second with sensor noise + gentle reversion to a healthy baseline." },
+    { t: "Fault shape", d: "Faults are continuous drift (not spikes) so early-warning is realistic." },
+    { t: "“Model” meaning", d: "For the demo, the physics model baseline ≈ the healthy reference curve; the gap is the signal." },
+    { t: "Alerting", d: "We use divergence \(σ\) as the early warning; alerts conceptually fire at 2.5σ." },
+    { t: "Numbers", d: "£ savings and thresholds are illustrative so the conversation stays grounded, not hand-wavy." },
+  ];
+
+  return (
+    <section id="setup" style={{ padding: "34px 64px 10px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        KPIs + <span style={{ color: T.amber }}>assumptions</span> (for this demo)
+      </h2>
+      <GoalLine>Quickly align on what we’re measuring, and what we’re assuming, before we deep dive.</GoalLine>
+
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 16 }}>
+        <div style={{ ...MONO, fontSize: 9, color: T.dim, letterSpacing: 2, marginBottom: 12 }}>ASSUMPTIONS</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {items.map((x) => (
+            <div key={x.t} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 10px" }}>
+              <div style={{ fontSize: 13, fontWeight: 750 }}>{x.t}</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{x.d}</div>
+            </div>
+          ))}
+        </div>
+
+        <Details summary="Optional: HVAC system explainer (for non-HVAC audiences)">
+          <HVACExplainerSection />
+        </Details>
+
+        <Details summary="Optional: how the demo is wired (simulated vs real)">
+          <DemoArchSection />
+        </Details>
+      </div>
+    </section>
+  );
+}
+
 // ── HVAC EXPLAINER ────────────────────────────────────────────────────────────
 function HVACExplainerSection() {
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: "18px 0 0", maxWidth: 1100, margin: "0 auto" }}>
       <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
         What the system<br /><span style={{ color: T.amber }}>actually does.</span>
       </h2>
@@ -405,11 +472,11 @@ function KPISection() {
   ];
 
   return (
-    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+    <section id="kpis" style={{ padding: "24px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
       <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
         The 4 KPIs that <span style={{ color: T.amber }}>drive action</span>
       </h2>
-      <GoalLine>Make the dashboard legible in one scan: “what’s healthy”, “what’s off”, “what to do next”.</GoalLine>
+      <GoalLine>In one scan you can answer: what’s healthy, what’s drifting, and what to do next.</GoalLine>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {kpis.map((k, i) => (
@@ -440,7 +507,7 @@ function KPISection() {
 // ── DEMO ARCHITECTURE ─────────────────────────────────────────────────────────
 function DemoArchSection() {
   return (
-    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: "18px 0 0", maxWidth: 1100, margin: "0 auto" }}>
       <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
         How the demo is <span style={{ color: T.amber }}>wired</span>
       </h2>
@@ -733,15 +800,16 @@ function RealSystemsSection() {
 function CTASection() {
   const [hov, setHov] = useState(false);
   return (
-    <section style={{ padding: "56px 64px 90px", maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
-      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 20 }}>LIVE DEMO</div>
+    <section id="deep-dive" style={{ padding: "56px 64px 90px", maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
+      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 20 }}>DEEPER ANALYSIS</div>
       <h2 style={{ fontSize: 44, fontWeight: 800, letterSpacing: -1.2, marginBottom: 14, lineHeight: 1.1 }}>
-        See it in action.
+        Switch into deep-dive mode.
       </h2>
       <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 620, margin: "0 auto 28px", fontWeight: 300 }}>
-        Inject a fault. Watch the divergence climb. Ask the AI anything. The whole system — fake data, real intelligence.
+        Start from the dashboard, inject a slow drift fault, watch divergence rise, then ask “why” in plain English and follow the evidence trail.
       </p>
       <button
+        onClick={() => { window.location.href = "/?view=digital-twin"; }}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
@@ -758,19 +826,19 @@ function CTASection() {
           ...MONO,
         }}
       >
-        LAUNCH CHL-03 LIVE DEMO →
+        OPEN CHL-03 DIGITAL TWIN →
       </button>
       <div style={{ maxWidth: 680, margin: "22px auto 0", textAlign: "left" }}>
         <Details summary="Demo script (optional)">
           <div style={{ padding: "16px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 10 }}>
             <div style={{ ...MONO, fontSize: 9, color: T.muted, letterSpacing: 2, marginBottom: 12 }}>DEMO SCRIPT</div>
             {[
-              ["1", "Start on the live dashboard — all green, divergence ~0.4σ"],
-              ["2", "Click 'Refrigerant Leak' in the fault injection panel"],
-              ["3", "Watch: COP drops below design, divergence climbs toward 2.5σ over ~65s"],
-              ["4", "AI alert fires automatically — click 'DEEP DIVE' for full analysis"],
-              ["5", "Use chat: ask 'What's happening?' or 'How urgent is this?'"],
-              ["6", "Click fault button again to resolve — everything reverts"],
+              ["1", "Start on this intro page: share the active vs reactive hypothesis"],
+              ["2", "Quickly scan the KPIs + assumptions so expectations are aligned"],
+              ["3", "Open the Digital Twin view"],
+              ["4", "Inject a drift fault (e.g. refrigerant leak) and watch σ climb first"],
+              ["5", "Then watch COP / power move and ask the AI “what changed?” + “how urgent?”"],
+              ["6", "Click into deep dive to see evidence + recommended next action"],
             ].map(([n, step]) => (
               <div key={n} style={{ display: "flex", gap: 12, marginBottom: 8 }}>
                 <span style={{ ...MONO, fontSize: 9, color: T.amber, flexShrink: 0 }}>{n}</span>
@@ -799,18 +867,14 @@ export default function App() {
 
       <div style={{ position: "relative", zIndex: 1 }}>
         <HeroSection />
-        <SectionNum n="01" label="THE SHIFT" />
+        <SectionNum n="01" label="THE HYPOTHESIS" />
         <ActiveVsReactiveSection />
-        <SectionNum n="02" label="THE SYSTEM" />
-        <HVACExplainerSection />
+        <SectionNum n="02" label="KPIS + ASSUMPTIONS" />
+        <DemoAssumptionsSection />
         <SectionNum n="03" label="THE METRICS" />
         <KPISection />
-        <SectionNum n="04" label="HOW IT WAS BUILT" />
-        <DemoArchSection />
-        <SectionNum n="05" label="WHAT AI ENABLES" />
+        <SectionNum n="04" label="WHAT AI ENABLES" />
         <AIEnablesSection />
-        <SectionNum n="06" label="REAL SYSTEMS + RAG" />
-        <RealSystemsSection />
         <CTASection />
       </div>
     </div>
