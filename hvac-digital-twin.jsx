@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
-const KB = `You are an expert HVAC AI inside Milvian Group's Aqueduct platform, monitoring CHL-03 factory chiller.
+const KB = `You are an expert HVAC AI inside Milvian Group's platform, monitoring CHL-03 factory chiller.
 FAULT SIGNATURES: Refrigerant leak = steady efficiency drop + COP below design + superheat rising. Clogged filter = AHU airflow drop with stable RPM + supply air temp rising. Fan bearing wear = cooling tower RPM drifting down + approach temp rising. High load = pressure + power rising + COP declining.
 NORMAL RANGES: COP 3.8-4.4 (design 4.1) · Power 175-195 kW (model 185) · Fouling 0-176e-6 m2K/W · Divergence <2.5 sigma
 Speak plainly to a facilities manager. Reference actual numbers. Be concise.`;
@@ -201,7 +201,7 @@ export default function App() {
         {/* Header */}
         <div style={{ padding: "8px 14px", borderBottom: `1px solid ${T.border}`, background: "#08091280", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2 }}>MILVIAN GROUP · AQUEDUCT</div>
+            <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2 }}>MILVIAN GROUP · PLATFORM</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>CHL-03 — factory chiller digital twin</div>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
@@ -560,7 +560,7 @@ function ChatSidebar({ msgs, inp, setInp, sendChat, chatBusy, chatBot }) {
     <aside style={{ width: 270, borderLeft: `1px solid ${T.border}`, background: "#090c14", display: "flex", flexDirection: "column", flexShrink: 0 }}>
       <div style={{ padding: "9px 13px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ fontSize: 8, color: T.muted, letterSpacing: 2 }}>AI ASSISTANT</div>
-        <div style={{ fontSize: 12, color: T.blue, fontWeight: 600 }}>Aqueduct Intelligence</div>
+        <div style={{ fontSize: 12, color: T.blue, fontWeight: 600 }}>Facility Intelligence</div>
       </div>
       <div style={{ flex: 1, overflow: "auto", padding: "10px 10px 0", display: "flex", flexDirection: "column", gap: 7 }}>
         {msgs.length === 0 && (
@@ -577,7 +577,7 @@ function ChatSidebar({ msgs, inp, setInp, sendChat, chatBusy, chatBot }) {
             borderRadius: 5, padding: "7px 9px", fontSize: 10, lineHeight: 1.65,
             color: m.role === "user" ? "#bfdbfe" : T.text,
           }}>
-            {m.role === "assistant" && <div style={{ fontSize: 7, color: T.muted, letterSpacing: 1, marginBottom: 3 }}>AQUEDUCT AI</div>}
+            {m.role === "assistant" && <div style={{ fontSize: 7, color: T.muted, letterSpacing: 1, marginBottom: 3 }}>AI ASSISTANT</div>}
             {m.content}
           </div>
         ))}

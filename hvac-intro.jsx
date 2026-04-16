@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 
 // Load Google Fonts
 const loadFonts = () => {
-  if (document.getElementById("aqueduct-fonts")) return;
+  if (document.getElementById("platform-fonts")) return;
   const link = document.createElement("link");
-  link.id = "aqueduct-fonts";
+  link.id = "platform-fonts";
   link.rel = "stylesheet";
   link.href = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap";
   document.head.appendChild(link);
@@ -21,7 +21,7 @@ const SANS = { fontFamily: "'Outfit',sans-serif" };
 
 function SectionNum({ n, label }) {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 64px 0", display: "flex", alignItems: "center", gap: 14 }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 64px 0", display: "flex", alignItems: "center", gap: 14 }}>
       <span style={{ ...MONO, fontSize: 11, color: T.amber, letterSpacing: 3 }}>{n}</span>
       <div style={{ flex: 1, height: 1, background: T.border }} />
       <span style={{ ...MONO, fontSize: 9, color: T.muted, letterSpacing: 3 }}>{label}</span>
@@ -33,6 +33,27 @@ function Tag({ children, color }) {
   color = color || T.amber;
   return (
     <span style={{ ...MONO, fontSize: 9, color, background: color + "18", border: `1px solid ${color}35`, borderRadius: 3, padding: "2px 8px", letterSpacing: 2 }}>{children}</span>
+  );
+}
+
+function GoalLine({ children }) {
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 10, margin: "12px 0 18px" }}>
+      <span style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 2 }}>GOAL</span>
+      <span style={{ fontSize: 14, color: T.muted, lineHeight: 1.5 }}>{children}</span>
+    </div>
+  );
+}
+
+function Details({ summary, children }) {
+  return (
+    <details style={{ marginTop: 14 }}>
+      <summary style={{ cursor: "pointer", ...MONO, fontSize: 10, color: T.text, letterSpacing: 1 }}>
+        {summary}
+        <span style={{ marginLeft: 10, color: T.dim, fontSize: 9 }}>click to expand</span>
+      </summary>
+      <div style={{ marginTop: 12 }}>{children}</div>
+    </details>
   );
 }
 
@@ -52,9 +73,9 @@ function HeroSection() {
   ];
 
   return (
-    <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "80px 64px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ minHeight: "72vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "64px 64px 44px", maxWidth: 1100, margin: "0 auto" }}>
       {/* Live readout bar */}
-      <div style={{ display: "flex", gap: 28, marginBottom: 52, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 22, marginBottom: 34, flexWrap: "wrap", alignItems: "center" }}>
         {live.map((m, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <div style={{ width: 5, height: 5, borderRadius: "50%", background: m.c, boxShadow: `0 0 6px ${m.c}` }} />
@@ -65,17 +86,30 @@ function HeroSection() {
         <span style={{ ...MONO, fontSize: 9, color: T.dim, marginLeft: "auto" }}>CHL-03 · LIVE</span>
       </div>
 
-      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 24 }}>MILVIAN GROUP · AQUEDUCT PLATFORM</div>
+      <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 24 }}>MILVIAN GROUP · PLATFORM</div>
 
-      <h1 style={{ fontSize: 74, fontWeight: 800, lineHeight: 1.06, margin: "0 0 30px", letterSpacing: -2, maxWidth: 780 }}>
+      <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.06, margin: "0 0 18px", letterSpacing: -2, maxWidth: 820 }}>
         Active<br />
         <span style={{ color: T.amber }}>facility</span><br />
         intelligence.
       </h1>
 
-      <p style={{ fontSize: 20, color: T.muted, lineHeight: 1.65, maxWidth: 560, margin: "0 0 48px", fontWeight: 300 }}>
-        Traditional HVAC dashboards show you what happened. This shows you what's happening, why, and exactly what to do — in plain English, to anyone on your team.
+      <p style={{ fontSize: 18, color: T.muted, lineHeight: 1.65, maxWidth: 660, margin: "0 0 26px", fontWeight: 300 }}>
+        Turn live HVAC telemetry into <span style={{ color: T.text }}>decisions</span>: detect drift early, explain the “why”, and recommend the next action in plain English.
       </p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, maxWidth: 860, marginBottom: 26 }}>
+        {[
+          { t: "Early warning", d: "Spot deviation before alarms trip." },
+          { t: "Root-cause in minutes", d: "Hypotheses + evidence, not guesswork." },
+          { t: "Anyone can use it", d: "Operators, techs, owners—same interface." },
+        ].map((c) => (
+          <div key={c.t} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 14px" }}>
+            <div style={{ fontSize: 13, fontWeight: 750, marginBottom: 6 }}>{c.t}</div>
+            <div style={{ fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{c.d}</div>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
         <div style={{ width: 40, height: 1, background: T.amber }} />
@@ -116,49 +150,77 @@ function ActiveVsReactiveSection() {
   );
 
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
-        The difference between<br /><span style={{ color: T.amber }}>watching and understanding.</span>
+    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        Watching vs <span style={{ color: T.amber }}>understanding</span>
       </h2>
-      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 580, marginBottom: 48, fontWeight: 300 }}>
-        Facilities teams have always had sensors. The problem was never data — it was context, interpretation, and making the data usable by the whole team, not just one expert.
-      </p>
+      <GoalLine>Make the difference obvious: alarms + experts vs continuous detection + guided action.</GoalLine>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-        {/* Reactive */}
-        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <Tag color={T.muted}>TRADITIONAL</Tag>
-            <span style={{ ...MONO, fontSize: 10, color: T.dim }}>reactive loop</span>
+            <span style={{ ...MONO, fontSize: 10, color: T.dim }}>reactive</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            {reactive.map((r, i) => row(r, T.muted, i))}
-          </div>
-          <div style={{ marginTop: 24, padding: "10px 14px", background: T.red + "12", border: `1px solid ${T.red}30`, borderRadius: 4 }}>
-            <span style={{ ...MONO, fontSize: 9, color: T.red }}>avg. response: 4–24 hours · requires specialist</span>
-          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, color: T.muted, lineHeight: 1.7, fontSize: 13 }}>
+            <li>Fault develops → noticed late</li>
+            <li>Generic alarms (no context)</li>
+            <li>Diagnosis lives in one expert’s head</li>
+          </ul>
+          <div style={{ marginTop: 10, ...MONO, fontSize: 9, color: T.red }}>Typical response: hours</div>
         </div>
 
-        {/* Active */}
-        <div style={{ background: T.card, border: `1px solid ${T.amber}30`, borderRadius: 8, padding: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+        <div style={{ background: T.card, border: `1px solid ${T.amber}30`, borderRadius: 10, padding: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <Tag color={T.amber}>ACTIVE AI</Tag>
-            <span style={{ ...MONO, fontSize: 10, color: T.amber }}>continuous intelligence</span>
+            <span style={{ ...MONO, fontSize: 10, color: T.amber }}>continuous</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            {active.map((r, i) => row(r, T.amber, i))}
-          </div>
-          <div style={{ marginTop: 24, padding: "10px 14px", background: T.green + "12", border: `1px solid ${T.green}30`, borderRadius: 4 }}>
-            <span style={{ ...MONO, fontSize: 9, color: T.green }}>avg. response: minutes · usable by anyone</span>
-          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, color: T.muted, lineHeight: 1.7, fontSize: 13 }}>
+            <li>Deviation detected early (σ rising)</li>
+            <li>Hypotheses + evidence in one click</li>
+            <li>Plain-English action for the whole team</li>
+          </ul>
+          <div style={{ marginTop: 10, ...MONO, fontSize: 9, color: T.green }}>Typical response: minutes</div>
         </div>
       </div>
 
-      <div style={{ marginTop: 28, padding: "18px 22px", background: T.amber + "10", border: `1px solid ${T.amber}25`, borderRadius: 6, maxWidth: 680 }}>
-        <span style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.6 }}>
-          The insight: <span style={{ color: T.amber }}>the data has always been there.</span> What was missing was interpretation — turning sensor readings into decisions anyone can act on.
-        </span>
-      </div>
+      <Details summary="Full walkthrough (traditional vs active)">
+        <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          {/* Reactive */}
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+              <Tag color={T.muted}>TRADITIONAL</Tag>
+              <span style={{ ...MONO, fontSize: 10, color: T.dim }}>reactive loop</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              {reactive.map((r, i) => row(r, T.muted, i))}
+            </div>
+            <div style={{ marginTop: 24, padding: "10px 14px", background: T.red + "12", border: `1px solid ${T.red}30`, borderRadius: 4 }}>
+              <span style={{ ...MONO, fontSize: 9, color: T.red }}>avg. response: 4–24 hours · requires specialist</span>
+            </div>
+          </div>
+
+          {/* Active */}
+          <div style={{ background: T.card, border: `1px solid ${T.amber}30`, borderRadius: 8, padding: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+              <Tag color={T.amber}>ACTIVE AI</Tag>
+              <span style={{ ...MONO, fontSize: 10, color: T.amber }}>continuous intelligence</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              {active.map((r, i) => row(r, T.amber, i))}
+            </div>
+            <div style={{ marginTop: 24, padding: "10px 14px", background: T.green + "12", border: `1px solid ${T.green}30`, borderRadius: 4 }}>
+              <span style={{ ...MONO, fontSize: 9, color: T.green }}>avg. response: minutes · usable by anyone</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 18, padding: "16px 18px", background: T.amber + "10", border: `1px solid ${T.amber}25`, borderRadius: 8, maxWidth: 760 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.6 }}>
+            The insight: <span style={{ color: T.amber }}>the data has always been there.</span> The missing piece was interpretation—turning readings into actions anyone can take.
+          </span>
+        </div>
+      </Details>
     </section>
   );
 }
@@ -343,31 +405,31 @@ function KPISection() {
   ];
 
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
-        Four numbers.<br /><span style={{ color: T.amber }}>Everything you need to know.</span>
+    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        The 4 KPIs that <span style={{ color: T.amber }}>drive action</span>
       </h2>
-      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 580, marginBottom: 40, fontWeight: 300 }}>
-        Every KPI on the dashboard maps to a physical reality in the system. Here's what each one means, what healthy looks like, and why it matters.
-      </p>
+      <GoalLine>Make the dashboard legible in one scan: “what’s healthy”, “what’s off”, “what to do next”.</GoalLine>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {kpis.map((k, i) => (
-          <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "20px 22px" }}>
+          <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px 16px" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
               <span style={{ fontSize: 18, fontWeight: 800, color: k.color }}>{k.name}</span>
               <span style={{ ...MONO, fontSize: 9, color: T.muted }}>{k.full}</span>
             </div>
             <div style={{ marginBottom: 12 }}>{k.visual}</div>
-            <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.65, marginBottom: 12 }}>{k.what}</p>
             <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
               <div style={{ ...MONO, fontSize: 9, color: T.green, background: T.green + "15", border: `1px solid ${T.green}30`, borderRadius: 3, padding: "2px 7px" }}>GOOD: {k.good}</div>
               <div style={{ ...MONO, fontSize: 9, color: T.blue,  background: T.blue  + "15", border: `1px solid ${T.blue}30`,  borderRadius: 3, padding: "2px 7px" }}>TARGET: {k.design}</div>
               <div style={{ ...MONO, fontSize: 9, color: T.red,   background: T.red   + "15", border: `1px solid ${T.red}30`,   borderRadius: 3, padding: "2px 7px" }}>ALERT: {k.alert}</div>
             </div>
-            <div style={{ fontSize: 12, color: T.amber, lineHeight: 1.6, paddingTop: 10, borderTop: `1px solid ${T.border}` }}>
-              {k.why}
-            </div>
+            <Details summary="What it means + why it matters">
+              <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, margin: "0 0 10px" }}>{k.what}</p>
+              <div style={{ fontSize: 12, color: T.amber, lineHeight: 1.6, paddingTop: 10, borderTop: `1px solid ${T.border}` }}>
+                {k.why}
+              </div>
+            </Details>
           </div>
         ))}
       </div>
@@ -378,19 +440,32 @@ function KPISection() {
 // ── DEMO ARCHITECTURE ─────────────────────────────────────────────────────────
 function DemoArchSection() {
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
-        How the demo<br /><span style={{ color: T.amber }}>was built.</span>
+    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        How the demo is <span style={{ color: T.amber }}>wired</span>
       </h2>
-      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 600, marginBottom: 40, fontWeight: 300 }}>
-        There's no real chiller, no BACnet connection, no time-series database. Everything is faked — but the AI analysis is completely real, and the architecture mirrors exactly how a production system would work.
-      </p>
+      <GoalLine>Clarify what’s “simulated” vs what’s real (the reasoning + UX patterns).</GoalLine>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 24 }}>
-        {/* Architecture diagram */}
-        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
-          <div style={{ ...MONO, fontSize: 8, color: T.muted, letterSpacing: 2, marginBottom: 16 }}>DEMO ARCHITECTURE</div>
-          <svg width="100%" viewBox="0 0 440 280" style={{ display: "block" }}>
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+          {[
+            { t: "Simulated telemetry", d: "Sensor noise + slow drift faults (realistic dynamics)." },
+            { t: "Real UX loop", d: "KPIs → alert → deep dive → action." },
+            { t: "Real LLM calls", d: "Chat + analysis run on live readings + KB." },
+          ].map((c) => (
+            <div key={c.t} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 10px" }}>
+              <div style={{ fontSize: 13, fontWeight: 750 }}>{c.t}</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{c.d}</div>
+            </div>
+          ))}
+        </div>
+
+        <Details summary="Architecture diagram + full explanation">
+          <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 24 }}>
+            {/* Architecture diagram */}
+            <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
+              <div style={{ ...MONO, fontSize: 8, color: T.muted, letterSpacing: 2, marginBottom: 16 }}>DEMO ARCHITECTURE</div>
+              <svg width="100%" viewBox="0 0 440 280" style={{ display: "block" }}>
             <defs>
               <marker id="arc" viewBox="0 0 8 8" refX="4" refY="7" markerWidth="5" markerHeight="5" orient="auto">
                 <polygon points="0,0 8,0 4,8" fill={T.muted} />
@@ -443,23 +518,25 @@ function DemoArchSection() {
             <text x="20" y="202" fill={T.muted} fontSize="8" fontFamily="monospace">injection or</text>
             <text x="20" y="212" fill={T.muted} fontSize="8" fontFamily="monospace">user message</text>
             <line x1="200" y1="240" x2="240" y2="252" stroke={T.amber} strokeWidth="1" strokeDasharray="4 4" />
-          </svg>
-        </div>
-
-        {/* Explanation */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {[
-            { label: "Fake data, real simulation", color: T.blue, body: "Sensors start at known BASE values and random-walk at ±0.09 per tick with a gentle reversion force that keeps them near baseline. It looks exactly like real sensor noise." },
-            { label: "Faults drift, they don't spike", color: T.amber, body: "Real faults are slow. A refrigerant leak drops efficiency by ~0.09 per second. After 65 seconds, divergence crosses 2.5σ — just like reality, not a sudden threshold alarm." },
-            { label: "The model is just the baseline", color: T.muted, body: "The 'physics model' in every chart is simply the BASE values. We don't need a real physics engine — the gap between actual and BASE is already the signal we care about." },
-            { label: "The AI is not faked", color: T.green, body: "Every alert, every chat response, every deep-dive analysis calls the real Claude API with live readings and a hardcoded HVAC knowledge base as the system prompt. It is genuinely reasoning about the data." },
-          ].map((c, i) => (
-            <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, padding: "12px 14px" }}>
-              <div style={{ ...MONO, fontSize: 9, color: c.color, letterSpacing: 1, marginBottom: 5 }}>{c.label.toUpperCase()}</div>
-              <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>{c.body}</p>
+              </svg>
             </div>
-          ))}
-        </div>
+
+            {/* Explanation */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { label: "Fake data, real dynamics", color: T.blue, body: "Random-walk noise around BASE values, plus gentle reversion. Looks like real sensors." },
+                { label: "Faults drift (not spikes)", color: T.amber, body: "We apply continuous drift so the early-warning story is believable." },
+                { label: "“Model” is baseline", color: T.muted, body: "For the demo, BASE is the reference. The gap is the signal." },
+                { label: "AI is real", color: T.green, body: "Alerts + chat are real LLM calls over live readings and a KB prompt." },
+              ].map((c, i) => (
+                <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 14px" }}>
+                  <div style={{ ...MONO, fontSize: 9, color: c.color, letterSpacing: 1, marginBottom: 5 }}>{c.label.toUpperCase()}</div>
+                  <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>{c.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Details>
       </div>
     </section>
   );
@@ -474,31 +551,46 @@ function AIEnablesSection() {
     { role: "Sustainability lead",  q: "Best time to run the system hard today?", a: "Grid carbon is 182 gCO2/kWh right now vs a 245 average. Run hard now and pre-cool before 14:00 — peak tariff kicks in then. Estimated demand charge saving of £280 if you pre-cool during the 11:00–14:00 window." },
   ];
 
+  const primary = qa.slice(0, 2);
+
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
-        Any question.<br /><span style={{ color: T.amber }}>Any team member.</span>
+    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        Ask like a human. Get an <span style={{ color: T.amber }}>action</span>.
       </h2>
-      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 600, marginBottom: 40, fontWeight: 300 }}>
-        The dashboard surfaces KPIs. The AI makes them usable. A junior technician, a building owner, a sustainability lead — all ask different questions and get answers they can act on.
-      </p>
+      <GoalLine>Make expertise accessible: different roles ask different questions, all get usable answers.</GoalLine>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {qa.map((item, i) => (
+        {primary.map((item, i) => (
           <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
             <div style={{ ...MONO, fontSize: 9, color: T.amber, marginBottom: 10 }}>{item.role.toUpperCase()}</div>
             {/* User message */}
             <div style={{ background: "#0e1e38", border: "1px solid #1d4ed860", borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#bfdbfe", marginBottom: 8 }}>{item.q}</div>
             {/* AI response */}
             <div style={{ background: "#0c1220", border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
-              <div style={{ ...MONO, fontSize: 7, color: T.muted, marginBottom: 3, letterSpacing: 1 }}>AQUEDUCT AI</div>
+              <div style={{ ...MONO, fontSize: 7, color: T.muted, marginBottom: 3, letterSpacing: 1 }}>AI ASSISTANT</div>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.65 }}>{item.a}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: 24, padding: "18px 22px", background: T.amber + "10", border: `1px solid ${T.amber}25`, borderRadius: 6 }}>
+      <Details summary="More example questions (other roles)">
+        <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {qa.slice(2).map((item, i) => (
+            <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
+              <div style={{ ...MONO, fontSize: 9, color: T.amber, marginBottom: 10 }}>{item.role.toUpperCase()}</div>
+              <div style={{ background: "#0e1e38", border: "1px solid #1d4ed860", borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#bfdbfe", marginBottom: 8 }}>{item.q}</div>
+              <div style={{ background: "#0c1220", border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
+                <div style={{ ...MONO, fontSize: 7, color: T.muted, marginBottom: 3, letterSpacing: 1 }}>AI ASSISTANT</div>
+                <div style={{ fontSize: 12, color: T.text, lineHeight: 1.65 }}>{item.a}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Details>
+
+      <div style={{ marginTop: 18, padding: "16px 18px", background: T.amber + "10", border: `1px solid ${T.amber}25`, borderRadius: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.65 }}>
           The shift: <span style={{ color: T.amber }}>HVAC expertise no longer lives in one person's head.</span> It lives in the system — accessible to the whole team, 24/7, in plain language.
         </div>
@@ -510,57 +602,69 @@ function AIEnablesSection() {
 // ── REAL SYSTEMS ──────────────────────────────────────────────────────────────
 function RealSystemsSection() {
   return (
-    <section style={{ padding: "48px 64px 72px", maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, letterSpacing: -1 }}>
-        In production:<br /><span style={{ color: T.amber }}>RAG makes the AI smarter over time.</span>
+    <section style={{ padding: "34px 64px 46px", maxWidth: 1100, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 38, fontWeight: 750, marginBottom: 0, letterSpacing: -1 }}>
+        Production: AI that <span style={{ color: T.amber }}>learns</span>
       </h2>
-      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 640, marginBottom: 40, fontWeight: 300 }}>
-        The demo uses a hardcoded HVAC knowledge base in the system prompt. In a real deployment, that knowledge base is replaced by a RAG pipeline — and it grows with every incident, every resolved fault, every maintenance event logged in the system.
-      </p>
+      <GoalLine>Explain the upgrade path: from a static prompt to building-specific knowledge via RAG.</GoalLine>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
-        {/* Comparison: demo KB vs production RAG */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
-            <Tag color={T.muted}>THIS DEMO</Tag>
-            <div style={{ marginTop: 12, marginBottom: 10, fontSize: 14, fontWeight: 600 }}>Hardcoded knowledge base</div>
-            <div style={{ ...MONO, fontSize: 9, color: T.muted, lineHeight: 2 }}>
-              {"// system prompt, written by hand"}<br />
-              {"const KB = `Fault signatures:"}<br />
-              {"- Refrigerant leak = efficiency falling..."}<br />
-              {"Normal ranges: COP 3.8–4.4...`"}
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+          {[
+            { t: "Demo", d: "Hardcoded KB (great for known signatures)." },
+            { t: "Production", d: "RAG over manuals + history + maintenance." },
+            { t: "Outcome", d: "Answers grounded in your actual equipment + past fixes." },
+          ].map((c) => (
+            <div key={c.t} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 10px" }}>
+              <div style={{ fontSize: 13, fontWeight: 750 }}>{c.t}</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{c.d}</div>
             </div>
-            <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, marginTop: 12, marginBottom: 0 }}>Works well for known fault types. Static. Doesn't learn. Doesn't know your specific equipment history or what actually fixed the last COP drop.</p>
-          </div>
-
-          <div style={{ background: T.card, border: `1px solid ${T.amber}30`, borderRadius: 8, padding: "18px 20px" }}>
-            <Tag color={T.amber}>PRODUCTION</Tag>
-            <div style={{ marginTop: 12, marginBottom: 10, fontSize: 14, fontWeight: 600 }}>RAG-augmented knowledge base</div>
-            <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, margin: "0 0 12px" }}>At query time, the system retrieves the most relevant context from a growing document store — and the AI reasons over real, building-specific knowledge, not just generic HVAC theory.</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {[
-                ["OEM manuals", "exact fault codes, pressure curves, service intervals"],
-                ["Fault + resolution logs", "\"last time COP dropped this way, it was X — fixed by Y\""],
-                ["Maintenance records", "tube cleaned Nov 2024, compressor serviced Feb 2025"],
-                ["ASHRAE + local standards", "compliance thresholds, recommended ranges"],
-                ["Building-specific config", "load profiles, occupancy patterns, tariff schedules"],
-              ].map(([title, sub], i) => (
-                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                  <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.amber, marginTop: 5, flexShrink: 0 }} />
-                  <div>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: T.amber }}>{title}</span>
-                    <span style={{ fontSize: 11, color: T.muted }}> — {sub}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Production Architecture SVG */}
-        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
-          <div style={{ ...MONO, fontSize: 8, color: T.muted, letterSpacing: 2, marginBottom: 16 }}>PRODUCTION ARCHITECTURE</div>
-          <svg width="100%" viewBox="0 0 380 340" style={{ display: "block" }}>
+        <Details summary="Comparison + production architecture">
+          <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
+            {/* Comparison: demo KB vs production RAG */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
+                <Tag color={T.muted}>THIS DEMO</Tag>
+                <div style={{ marginTop: 12, marginBottom: 10, fontSize: 14, fontWeight: 600 }}>Hardcoded knowledge base</div>
+                <div style={{ ...MONO, fontSize: 9, color: T.muted, lineHeight: 2 }}>
+                  {"// system prompt, written by hand"}<br />
+                  {"const KB = `Fault signatures:"}<br />
+                  {"- Refrigerant leak = efficiency falling..."}<br />
+                  {"Normal ranges: COP 3.8–4.4...`"}
+                </div>
+                <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, marginTop: 12, marginBottom: 0 }}>Works well for known fault types. Static. Doesn’t learn building history.</p>
+              </div>
+
+              <div style={{ background: T.card, border: `1px solid ${T.amber}30`, borderRadius: 8, padding: "18px 20px" }}>
+                <Tag color={T.amber}>PRODUCTION</Tag>
+                <div style={{ marginTop: 12, marginBottom: 10, fontSize: 14, fontWeight: 600 }}>RAG-augmented knowledge base</div>
+                <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.65, margin: "0 0 12px" }}>Retrieve the most relevant building-specific context at query time.</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {[
+                    ["OEM manuals", "fault codes, curves, service intervals"],
+                    ["Fault + resolution logs", "what fixed it last time"],
+                    ["Maintenance records", "what was serviced and when"],
+                    ["Standards + config", "ranges, constraints, tariffs"],
+                  ].map(([title, sub], i) => (
+                    <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.amber, marginTop: 5, flexShrink: 0 }} />
+                      <div>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: T.amber }}>{title}</span>
+                        <span style={{ fontSize: 11, color: T.muted }}> — {sub}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Production Architecture SVG */}
+            <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
+              <div style={{ ...MONO, fontSize: 8, color: T.muted, letterSpacing: 2, marginBottom: 16 }}>PRODUCTION ARCHITECTURE</div>
+              <svg width="100%" viewBox="0 0 380 340" style={{ display: "block" }}>
             <defs>
               <marker id="arcP" viewBox="0 0 8 8" refX="4" refY="7" markerWidth="5" markerHeight="5" orient="auto">
                 <polygon points="0,0 8,0 4,8" fill={T.muted} />
@@ -606,13 +710,15 @@ function RealSystemsSection() {
 
             {/* Output */}
             <rect x="10" y="292" width="360" height="38" rx="4" fill={T.card} stroke={T.green} strokeWidth="0.8" />
-            <text x="20" y="308" fill={T.green} fontSize="7" letterSpacing="2" fontFamily="monospace">AQUEDUCT DASHBOARD + CHAT</text>
+            <text x="20" y="308" fill={T.green} fontSize="7" letterSpacing="2" fontFamily="monospace">DASHBOARD + CHAT</text>
             <text x="20" y="322" fill={T.muted} fontSize="8" fontFamily="monospace">same interface · richer analysis · learns from every incident</text>
-          </svg>
-        </div>
+              </svg>
+            </div>
+          </div>
+        </Details>
       </div>
 
-      <div style={{ marginTop: 20, padding: "16px 20px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 6 }}>
+      <div style={{ marginTop: 18, padding: "16px 18px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 10 }}>
         <div style={{ ...MONO, fontSize: 9, color: T.amber, marginBottom: 6 }}>THE KEY UPGRADE</div>
         <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.65, margin: 0 }}>
           With hardcoded KB: <em style={{ color: T.text }}>AI knows generic HVAC theory.</em> &nbsp;·&nbsp;
@@ -627,12 +733,12 @@ function RealSystemsSection() {
 function CTASection() {
   const [hov, setHov] = useState(false);
   return (
-    <section style={{ padding: "80px 64px 120px", maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
+    <section style={{ padding: "56px 64px 90px", maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
       <div style={{ ...MONO, fontSize: 10, color: T.amber, letterSpacing: 4, marginBottom: 20 }}>LIVE DEMO</div>
-      <h2 style={{ fontSize: 52, fontWeight: 800, letterSpacing: -1.5, marginBottom: 20, lineHeight: 1.1 }}>
+      <h2 style={{ fontSize: 44, fontWeight: 800, letterSpacing: -1.2, marginBottom: 14, lineHeight: 1.1 }}>
         See it in action.
       </h2>
-      <p style={{ fontSize: 18, color: T.muted, lineHeight: 1.65, maxWidth: 520, margin: "0 auto 48px", fontWeight: 300 }}>
+      <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.65, maxWidth: 620, margin: "0 auto 28px", fontWeight: 300 }}>
         Inject a fault. Watch the divergence climb. Ask the AI anything. The whole system — fake data, real intelligence.
       </p>
       <button
@@ -654,21 +760,25 @@ function CTASection() {
       >
         LAUNCH CHL-03 LIVE DEMO →
       </button>
-      <div style={{ marginTop: 64, padding: "28px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, textAlign: "left", maxWidth: 640, margin: "64px auto 0" }}>
-        <div style={{ ...MONO, fontSize: 9, color: T.muted, letterSpacing: 2, marginBottom: 14 }}>DEMO SCRIPT</div>
-        {[
-          ["1", "Start on the live dashboard — all green, divergence ~0.4σ"],
-          ["2", "Click 'Refrigerant Leak' in the fault injection panel"],
-          ["3", "Watch: COP drops below design, divergence climbs toward 2.5σ over ~65s"],
-          ["4", "AI alert fires automatically — click 'DEEP DIVE' for full analysis"],
-          ["5", "Use chat: ask 'What's happening?' or 'How urgent is this?'"],
-          ["6", "Click fault button again to resolve — everything reverts"],
-        ].map(([n, step]) => (
-          <div key={n} style={{ display: "flex", gap: 12, marginBottom: 8 }}>
-            <span style={{ ...MONO, fontSize: 9, color: T.amber, flexShrink: 0 }}>{n}</span>
-            <span style={{ fontSize: 13, color: T.muted, lineHeight: 1.5 }}>{step}</span>
+      <div style={{ maxWidth: 680, margin: "22px auto 0", textAlign: "left" }}>
+        <Details summary="Demo script (optional)">
+          <div style={{ padding: "16px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 10 }}>
+            <div style={{ ...MONO, fontSize: 9, color: T.muted, letterSpacing: 2, marginBottom: 12 }}>DEMO SCRIPT</div>
+            {[
+              ["1", "Start on the live dashboard — all green, divergence ~0.4σ"],
+              ["2", "Click 'Refrigerant Leak' in the fault injection panel"],
+              ["3", "Watch: COP drops below design, divergence climbs toward 2.5σ over ~65s"],
+              ["4", "AI alert fires automatically — click 'DEEP DIVE' for full analysis"],
+              ["5", "Use chat: ask 'What's happening?' or 'How urgent is this?'"],
+              ["6", "Click fault button again to resolve — everything reverts"],
+            ].map(([n, step]) => (
+              <div key={n} style={{ display: "flex", gap: 12, marginBottom: 8 }}>
+                <span style={{ ...MONO, fontSize: 9, color: T.amber, flexShrink: 0 }}>{n}</span>
+                <span style={{ fontSize: 13, color: T.muted, lineHeight: 1.5 }}>{step}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </Details>
       </div>
     </section>
   );
