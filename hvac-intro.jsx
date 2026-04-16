@@ -11,9 +11,9 @@ const loadFonts = () => {
 };
 
 const T = {
-  bg: "#05070d", card: "#0a0e18", border: "#141c2b",
-  text: "#dde4f0", muted: "#6e7f96", dim: "#2a3545",
-  amber: "#e3b341", blue: "#58a6ff", green: "#3fb950", red: "#f85149",
+  bg: "#f7f9fc", card: "#ffffff", border: "#e2e8f0",
+  text: "#0b1220", muted: "#4b5563", dim: "#94a3b8",
+  amber: "#b45309", blue: "#2563eb", green: "#16a34a", red: "#dc2626",
 };
 
 const MONO = { fontFamily: "'IBM Plex Mono','JetBrains Mono',monospace" };
@@ -380,8 +380,8 @@ function KPISection() {
       visual: (
         <div style={{ height: 36, background: T.dim, borderRadius: 2, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${T.green}50 0%, ${T.amber}70 50%, ${T.red}90 85%)`, borderRadius: 2 }} />
-          <div style={{ position: "absolute", top: "50%", left: "3.5%", transform: "translateY(-50%)", width: 2, height: "70%", background: "#fff" }} />
-          <div style={{ ...MONO, position: "absolute", top: 2, right: 4, fontSize: 8, color: "#fff80" }}>now: 3.2 / 176</div>
+          <div style={{ position: "absolute", top: "50%", left: "3.5%", transform: "translateY(-50%)", width: 2, height: "70%", background: T.text }} />
+          <div style={{ ...MONO, position: "absolute", top: 2, right: 4, fontSize: 8, color: T.muted }}>now: 3.2 / 176</div>
         </div>
       ),
     },
@@ -565,9 +565,9 @@ function AIEnablesSection() {
           <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
             <div style={{ ...MONO, fontSize: 9, color: T.amber, marginBottom: 10 }}>{item.role.toUpperCase()}</div>
             {/* User message */}
-            <div style={{ background: "#0e1e38", border: "1px solid #1d4ed860", borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#bfdbfe", marginBottom: 8 }}>{item.q}</div>
+            <div style={{ background: "#eff6ff", border: `1px solid ${T.blue}33`, borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#1e3a8a", marginBottom: 8 }}>{item.q}</div>
             {/* AI response */}
-            <div style={{ background: "#0c1220", border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
+            <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
               <div style={{ ...MONO, fontSize: 7, color: T.muted, marginBottom: 3, letterSpacing: 1 }}>AI ASSISTANT</div>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.65 }}>{item.a}</div>
             </div>
@@ -580,8 +580,8 @@ function AIEnablesSection() {
           {qa.slice(2).map((item, i) => (
             <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "18px 20px" }}>
               <div style={{ ...MONO, fontSize: 9, color: T.amber, marginBottom: 10 }}>{item.role.toUpperCase()}</div>
-              <div style={{ background: "#0e1e38", border: "1px solid #1d4ed860", borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#bfdbfe", marginBottom: 8 }}>{item.q}</div>
-              <div style={{ background: "#0c1220", border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
+              <div style={{ background: "#eff6ff", border: `1px solid ${T.blue}33`, borderRadius: 5, padding: "7px 10px", fontSize: 12, color: "#1e3a8a", marginBottom: 8 }}>{item.q}</div>
+              <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 10px" }}>
                 <div style={{ ...MONO, fontSize: 7, color: T.muted, marginBottom: 3, letterSpacing: 1 }}>AI ASSISTANT</div>
                 <div style={{ fontSize: 12, color: T.text, lineHeight: 1.65 }}>{item.a}</div>
               </div>

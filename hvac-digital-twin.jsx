@@ -90,9 +90,9 @@ function doTick(prev, fKey) {
 }
 
 const T = {
-  bg: "#06080e", card: "#0b0f18", border: "#161e2e",
-  text: "#dde4f0", muted: "#6e7f96", dim: "#2d3a4a",
-  green: "#3fb950", amber: "#e3b341", red: "#f85149", blue: "#58a6ff",
+  bg: "#f7f9fc", card: "#ffffff", border: "#e2e8f0",
+  text: "#0b1220", muted: "#4b5563", dim: "#94a3b8",
+  green: "#16a34a", amber: "#b45309", red: "#dc2626", blue: "#2563eb",
 };
 
 const MONO = { fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospace" };
@@ -199,7 +199,7 @@ export default function App() {
       <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
 
         {/* Header */}
-        <div style={{ padding: "8px 14px", borderBottom: `1px solid ${T.border}`, background: "#08091280", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ padding: "8px 14px", borderBottom: `1px solid ${T.border}`, background: "rgba(255,255,255,0.72)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2 }}>MILVIAN GROUP · PLATFORM</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>CHL-03 — factory chiller digital twin</div>
@@ -230,7 +230,7 @@ export default function App() {
           {(aiAlert || alertLoading) && (
             <div style={{ ...card({ padding: "10px 14px", borderColor: T.amber }), display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span style={{ fontSize: 8, color: T.amber, letterSpacing: 2, flexShrink: 0, paddingTop: 1 }}>AI ALERT</span>
-              <span style={{ fontSize: 11, color: "#f5d48a", lineHeight: 1.65 }}>{alertLoading ? "Analyzing fault pattern..." : aiAlert}</span>
+              <span style={{ fontSize: 11, color: T.amber, lineHeight: 1.65 }}>{alertLoading ? "Analyzing fault pattern..." : aiAlert}</span>
               {!alertLoading && (
                 <button onClick={() => sendChat(`Deep dive on the ${fObj?.label} fault -- full root cause analysis and step by step action plan`)}
                   style={{ marginLeft: "auto", flexShrink: 0, background: "transparent", border: `1px solid ${T.amber}`, color: T.amber, padding: "3px 9px", borderRadius: 3, cursor: "pointer", fontSize: 8, letterSpacing: 1, ...MONO }}>
@@ -557,7 +557,7 @@ function FaultPanel({ fault, onToggle }) {
 
 function ChatSidebar({ msgs, inp, setInp, sendChat, chatBusy, chatBot }) {
   return (
-    <aside style={{ width: 270, borderLeft: `1px solid ${T.border}`, background: "#090c14", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+    <aside style={{ width: 270, borderLeft: `1px solid ${T.border}`, background: T.card, display: "flex", flexDirection: "column", flexShrink: 0 }}>
       <div style={{ padding: "9px 13px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ fontSize: 8, color: T.muted, letterSpacing: 2 }}>AI ASSISTANT</div>
         <div style={{ fontSize: 12, color: T.blue, fontWeight: 600 }}>Facility Intelligence</div>
@@ -572,16 +572,16 @@ function ChatSidebar({ msgs, inp, setInp, sendChat, chatBusy, chatBot }) {
           <div key={i} style={{
             alignSelf: m.role === "user" ? "flex-end" : "flex-start",
             maxWidth: "93%",
-            background: m.role === "user" ? "#0e1e38" : "#0c1220",
-            border: `1px solid ${m.role === "user" ? "#1d4ed860" : T.border}`,
+            background: m.role === "user" ? "#eff6ff" : T.card,
+            border: `1px solid ${m.role === "user" ? `${T.blue}33` : T.border}`,
             borderRadius: 5, padding: "7px 9px", fontSize: 10, lineHeight: 1.65,
-            color: m.role === "user" ? "#bfdbfe" : T.text,
+            color: m.role === "user" ? "#1e3a8a" : T.text,
           }}>
             {m.role === "assistant" && <div style={{ fontSize: 7, color: T.muted, letterSpacing: 1, marginBottom: 3 }}>AI ASSISTANT</div>}
             {m.content}
           </div>
         ))}
-        {chatBusy && <div style={{ alignSelf: "flex-start", background: "#0c1220", border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 9px", fontSize: 10, color: T.dim }}>Analyzing...</div>}
+        {chatBusy && <div style={{ alignSelf: "flex-start", background: T.card, border: `1px solid ${T.border}`, borderRadius: 5, padding: "7px 9px", fontSize: 10, color: T.dim }}>Analyzing...</div>}
         <div ref={chatBot} />
       </div>
       <div style={{ padding: "8px 10px", borderTop: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -597,7 +597,7 @@ function ChatSidebar({ msgs, inp, setInp, sendChat, chatBusy, chatBot }) {
             placeholder="Ask anything..."
             style={{ flex: 1, background: T.bg, border: `1px solid ${T.border}`, color: T.text, padding: "6px 9px", borderRadius: 4, fontSize: 10, outline: "none", ...MONO }}
           />
-          <button onClick={() => { sendChat(inp); setInp(""); }} style={{ background: "#1f6feb", border: "none", color: "#fff", padding: "6px 11px", borderRadius: 4, cursor: "pointer", fontSize: 13 }}>
+          <button onClick={() => { sendChat(inp); setInp(""); }} style={{ background: T.blue, border: "none", color: "#fff", padding: "6px 11px", borderRadius: 4, cursor: "pointer", fontSize: 13 }}>
             →
           </button>
         </div>
