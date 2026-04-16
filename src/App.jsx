@@ -11,6 +11,7 @@ function getInitialRoute() {
 
 function setViewQueryParam(next) {
   const url = new URL(window.location.href);
+  // Preserve all other query params (e.g. focus/id drill-in state in the demo)
   url.searchParams.set("view", next === "twin" ? "digital-twin" : "intro");
   window.history.replaceState({}, "", url.toString());
 }

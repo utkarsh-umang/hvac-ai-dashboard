@@ -56,21 +56,100 @@ const FLEET_BASE = [
   { id: "CHL-04", cop: 3.44, tag: "fault", tc: "#f85149" },
 ];
 
+const AHU_FLEET_BASE = [
+  { id: "AHU-01", airflow: 4500, sat: 16.0, tag: "live" },
+  { id: "AHU-02", airflow: 4200, sat: 16.4, tag: null },
+  { id: "AHU-03", airflow: 3950, sat: 16.8, tag: "watch" },
+  { id: "AHU-04", airflow: 4650, sat: 15.9, tag: null },
+];
+
+function PlantStrip({ fleet, ahus, onOpen }) {
+  const tile = ({ id, top, bottom, accent, tag, focus }) => (
+    <button
+      key={id}
+      onClick={() => onOpen({ focus, id })}
+      style={{
+        ...MONO,
+        cursor: "pointer",
+        textAlign: "left",
+        padding: "10px 10px",
+        borderRadius: 6,
+        border: `1px solid ${T.border}`,
+        background: "#fff",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{id}</span>
+        {tag && (
+          <span style={{ fontSize: 8, color: accent || T.muted, background: (accent || T.muted) + "18", border: `1px solid ${(accent || T.muted)}40`, borderRadius: 10, padding: "1px 7px" }}>
+            {tag}
+          </span>
+        )}
+        <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, color: accent || T.muted }}>{top}</span>
+      </div>
+      <div style={{ marginTop: 4, fontSize: 9, color: T.muted }}>{bottom}</div>
+    </button>
+  );
+
+  return (
+    <div style={card({ padding: 12 })}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <span style={{ ...SL, marginBottom: 0 }}>PLANT — ONE LEVEL DRILL-IN</span>
+        <span style={{ fontSize: 9, color: T.dim }}>click any unit</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 7, marginBottom: 10 }}>
+        {fleet.map((c) => tile({
+          id: c.id,
+          focus: "chiller",
+          tag: c.tag,
+          accent: c.id === "CHL-03" ? T.blue : (c.tag === "fault" ? T.red : c.tag === "watch" ? T.amber : c.tag === "top" ? T.green : null),
+          top: `COP ${c.cop.toFixed(2)}`,
+          bottom: c.id === "CHL-03" ? "live sensors" : "summary only (demo)",
+        }))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 7 }}>
+        {ahus.map((a) => tile({
+          id: a.id,
+          focus: "ahu",
+          tag: a.tag,
+          accent: a.id === "AHU-01" ? T.blue : (a.tag === "watch" ? T.amber : null),
+          top: `${Math.round(a.airflow)} CFM`,
+          bottom: `SAT ${a.sat.toFixed(1)}°C`,
+        }))}
+      </div>
+    </div>
+  );
+}
+
 function deriveKPIs(s, rf) {
   const cop = Math.round((s.chiller.efficiency / 100) * 4.8 * 100) / 100;
   const pwr = Math.round(185 + (BASE.chiller.efficiency - s.chiller.efficiency) * 1.8);
   let maxDev = 0;
-  for (const [c, m] of Object.entries(s))
+  const contributors = [];
+  for (const [c, m] of Object.entries(s)) {
     for (const [k, v] of Object.entries(m)) {
-      const std = Math.abs(BASE[c][k]) * 0.025 + 0.01;
-      const dev = Math.abs(v - BASE[c][k]) / std;
+      const baseline = BASE[c][k];
+      const std = Math.abs(baseline) * 0.025 + 0.01;
+      const dev = Math.abs(v - baseline) / std;
+      contributors.push({
+        comp: c,
+        metric: k,
+        devSigma: Math.round(dev * 100) / 100,
+        value: v,
+        baseline,
+      });
       if (dev > maxDev) maxDev = dev;
     }
+  }
+  contributors.sort((a, b) => b.devSigma - a.devSigma);
   return {
     cop, pwr,
     div:     Math.round(maxDev * 100) / 100,
     rfPct:   Math.round(rf / 176 * 100),
     svcHrs:  Math.round((176 - rf) / 176 * 200),
+    contributors,
   };
 }
 
@@ -99,7 +178,30 @@ const MONO = { fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospa
 const card = (p = {}) => ({ background: T.card, border: `1px solid ${T.border}`, borderRadius: 5, ...p });
 const SL = { fontSize: 8, color: T.muted, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 8, display: "block" };
 
+function getRouteState() {
+  const params = new URLSearchParams(window.location.search);
+  const focusRaw = (params.get("focus") || "plant").toLowerCase();
+  const focus = (focusRaw === "chiller" || focusRaw === "ahu" || focusRaw === "plant") ? focusRaw : "plant";
+  const id = params.get("id") || "";
+  return { focus, id };
+}
+
+function setRouteState(next, { replace = false } = {}) {
+  const url = new URL(window.location.href);
+  if (!next || !next.focus || next.focus === "plant") {
+    url.searchParams.delete("focus");
+    url.searchParams.delete("id");
+  } else {
+    url.searchParams.set("focus", next.focus);
+    if (next.id) url.searchParams.set("id", next.id);
+    else url.searchParams.delete("id");
+  }
+  const method = replace ? "replaceState" : "pushState";
+  window.history[method]({}, "", url.toString());
+}
+
 export default function App() {
+  const [route, setRoute] = useState(getRouteState);
   const [sensors,      setSensors]      = useState(BASE);
   const [history,      setHistory]      = useState(() =>
     Array.from({ length: 72 }, (_, i) => ({
@@ -107,6 +209,18 @@ export default function App() {
       pwr: 185 + (Math.random() - .5) * 3,
       div: .35 + Math.random() * .25,
       appTemp: 24.6 + (Math.random() - .5) * .2,
+      chEff: 87 + (Math.random() - .5) * 0.6,
+      chPres: 4.3 + (Math.random() - .5) * 0.06,
+      chwIn: 12.5 + (Math.random() - .5) * 0.3,
+      chwOut: 7.2 + (Math.random() - .5) * 0.2,
+      cdwIn: 30.1 + (Math.random() - .5) * 0.3,
+      cdwOut: 24.6 + (Math.random() - .5) * 0.3,
+      ahCfm: 4500 + (Math.random() - .5) * 80,
+      ahFan: 1200 + (Math.random() - .5) * 10,
+      ahSat: 16 + (Math.random() - .5) * 0.15,
+      ahRat: 24 + (Math.random() - .5) * 0.2,
+      zoneTemp: 23.6 + (Math.random() - .5) * 0.3,
+      zoneSp: 23.5,
     }))
   );
   const [fault,        setFault]        = useState(null);
@@ -127,6 +241,12 @@ export default function App() {
   useEffect(() => { rfRef.current      = rf;      }, [rf]);
 
   useEffect(() => {
+    const onPopState = () => setRoute(getRouteState());
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  useEffect(() => {
     const id = setInterval(() => {
       const fKey = faultRef.current;
       setSensors(prev => {
@@ -136,6 +256,18 @@ export default function App() {
           i: h[h.length - 1].i + 1,
           cop: kpis.cop, pwr: kpis.pwr, div: kpis.div,
           appTemp: next.cooling_tower.outlet_temp,
+          chEff: next.chiller.efficiency,
+          chPres: next.chiller.pressure,
+          chwIn: next.chiller.inlet_temp,
+          chwOut: next.chiller.outlet_temp,
+          cdwIn: next.cooling_tower.inlet_temp,
+          cdwOut: next.cooling_tower.outlet_temp,
+          ahCfm: next.ahu.airflow,
+          ahFan: next.ahu.fan_rpm,
+          ahSat: next.ahu.supply_air_temp,
+          ahRat: next.ahu.return_air_temp,
+          zoneTemp: Math.round((22.8 + (next.ahu.return_air_temp - 24.0) * 0.4 + Math.sin(h[h.length - 1].i / 10) * 0.15) * 100) / 100,
+          zoneSp: 23.5,
         }]);
         return next;
       });
@@ -203,7 +335,18 @@ export default function App() {
   const fObj     = fault ? FAULTS[fault] : null;
   const cData    = history.slice(-72);
   const fleet    = FLEET_BASE.map(f => f.id === "CHL-03" ? { ...f, cop: kpis.cop } : f).sort((a, b) => b.cop - a.cop);
+  const ahuFleet = AHU_FLEET_BASE.map(a => a.id === "AHU-01" ? { ...a, airflow: sensors.ahu.airflow, sat: sensors.ahu.supply_air_temp } : a);
   const divColor = kpis.div > 2.5 ? T.red : kpis.div > 1.5 ? T.amber : T.green;
+
+  const openPlant = useCallback(() => {
+    setRouteState({ focus: "plant" });
+    setRoute({ focus: "plant", id: "" });
+  }, []);
+
+  const openUnit = useCallback((focus, id) => {
+    setRouteState({ focus, id });
+    setRoute({ focus, id });
+  }, []);
 
   return (
     <div style={{ ...MONO, display: "flex", height: "100vh", background: T.bg, color: T.text, overflow: "hidden" }}>
@@ -214,7 +357,9 @@ export default function App() {
         <div style={{ padding: "8px 14px", borderBottom: `1px solid ${T.border}`, background: "rgba(255,255,255,0.72)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 9, color: T.muted, letterSpacing: 2 }}>MILVIAN GROUP · PLATFORM</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>CHL-03 — factory chiller digital twin</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
+              {route.focus === "plant" ? "Plant overview — HVAC digital twin" : `${route.id || (route.focus === "chiller" ? "Chiller" : "AHU")} — drill-in`}
+            </div>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
             <Pill color={T.green} label="Online" />
@@ -226,17 +371,50 @@ export default function App() {
 
         <div style={{ padding: "10px 14px 20px", display: "flex", flexDirection: "column", gap: 9 }}>
 
+          {/* Drill-in header */}
+          {route.focus !== "plant" && (
+            <div style={{ ...card({ padding: "9px 12px" }), display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={openPlant}
+                style={{ ...MONO, fontSize: 10, letterSpacing: 1, padding: "6px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: "transparent", cursor: "pointer", color: T.muted }}
+              >
+                ← Back to Plant
+              </button>
+              <span style={{ fontSize: 10, color: T.dim }}>Plant</span>
+              <span style={{ fontSize: 10, color: T.dim }}>→</span>
+              <span style={{ fontSize: 10, color: T.text, fontWeight: 700 }}>{route.id || (route.focus === "chiller" ? "Chiller" : "AHU")}</span>
+              <span style={{ marginLeft: "auto", fontSize: 9, color: T.dim }}>one-level drill-in</span>
+            </div>
+          )}
+
           {/* KPI Strip */}
           <KPIStrip kpis={kpis} rf={rf} divColor={divColor} />
 
+          {/* Plant strip (overview only) */}
+          {route.focus === "plant" && (
+            <PlantStrip
+              fleet={fleet}
+              ahus={ahuFleet}
+              onOpen={({ focus, id }) => {
+                openUnit(focus, id);
+              }}
+            />
+          )}
+
           {/* Middle row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 9 }}>
-            <SystemFlow sensors={sensors} kpis={kpis} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-              <FaultDiagnosis fObj={fObj} kpis={kpis} />
-              <ComponentHealth sensors={sensors} kpis={kpis} />
+          {route.focus === "plant" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 9 }}>
+              <SystemFlow sensors={sensors} kpis={kpis} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                <FaultDiagnosis fObj={fObj} kpis={kpis} />
+                <ComponentHealth sensors={sensors} kpis={kpis} />
+              </div>
             </div>
-          </div>
+          ) : (
+            route.focus === "chiller"
+              ? <ChillerDetail id={route.id} sensors={sensors} kpis={kpis} rf={rf} data={cData} divColor={divColor} />
+              : <AhuDetail id={route.id} sensors={sensors} kpis={kpis} data={cData} divColor={divColor} />
+          )}
 
           {/* AI Alert banner */}
           {(aiAlert || alertLoading) && (
@@ -270,6 +448,122 @@ export default function App() {
 
       {/* Chat sidebar */}
       <ChatSidebar msgs={msgs} inp={inp} setInp={setInp} sendChat={sendChat} chatBusy={chatBusy} chatBot={chatBot} />
+    </div>
+  );
+}
+
+function MetricRow({ label, value, sub, color }) {
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
+      <span style={{ fontSize: 10, color: T.muted, width: 140 }}>{label}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color: color || T.text }}>{value}</span>
+      {sub && <span style={{ fontSize: 9, color: T.dim, marginLeft: "auto" }}>{sub}</span>}
+    </div>
+  );
+}
+
+function ContributorsCard({ title, contributors, filterComp }) {
+  const items = (contributors || []).filter(c => !filterComp || c.comp === filterComp).slice(0, 5);
+  return (
+    <div style={card({ padding: 12 })}>
+      <span style={SL}>{title}</span>
+      {items.length === 0 ? (
+        <div style={{ fontSize: 10, color: T.dim }}>No contributor data.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {items.map((c) => (
+            <div key={`${c.comp}.${c.metric}`} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <span style={{ fontSize: 10, width: 88, color: T.muted }}>{c.comp}</span>
+              <span style={{ fontSize: 10, width: 120, color: T.text }}>{c.metric}</span>
+              <div style={{ flex: 1, height: 4, background: T.dim, borderRadius: 3 }}>
+                <div style={{ height: "100%", width: `${Math.min(100, (c.devSigma / 3.5) * 100)}%`, background: c.devSigma > 2.5 ? T.red : c.devSigma > 1.5 ? T.amber : T.green, borderRadius: 3 }} />
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, width: 44, textAlign: "right" }}>{c.devSigma}σ</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChillerDetail({ id, sensors, kpis, rf, data, divColor }) {
+  const isLive = !id || id === "CHL-03";
+  const s = sensors;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 9 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+        <div style={card({ padding: 12 })}>
+          <span style={SL}>{(id || "CHL-03").toUpperCase()} — PERFORMANCE</span>
+          {!isLive && <div style={{ fontSize: 9, color: T.dim, marginBottom: 8 }}>summary-only unit (demo)</div>}
+          <MetricRow label="COP" value={`${kpis.cop} / 4.1`} color={kpis.cop < 3.8 ? T.red : kpis.cop < 4.1 ? T.amber : T.green} sub="actual / design" />
+          <MetricRow label="Power draw" value={`${kpis.pwr} kW`} sub="vs model 185kW" color={Math.abs(kpis.pwr - 185) > 15 ? T.amber : T.text} />
+          <MetricRow label="Efficiency" value={`${s.chiller.efficiency}%`} sub="proxy for cooling output" />
+          <MetricRow label="Pressure" value={`${s.chiller.pressure} bar`} sub="refrigerant circuit signal" />
+          <MetricRow label="CHW temps" value={`${s.chiller.inlet_temp}°C → ${s.chiller.outlet_temp}°C`} sub="inlet → outlet" />
+          <MetricRow label="Condenser temps" value={`${s.cooling_tower.inlet_temp}°C → ${s.cooling_tower.outlet_temp}°C`} sub="inlet → outlet" />
+          <div style={{ marginTop: 8, fontSize: 9, color: T.dim }}>
+            Fouling Rf: <span style={{ color: kpis.rfPct > 70 ? T.red : kpis.rfPct > 40 ? T.amber : T.green, fontWeight: 700 }}>{rf.toFixed(1)}×10⁻⁶</span> ({kpis.rfPct}% to ASHRAE limit)
+          </div>
+        </div>
+
+        <ContributorsCard title={`WHY σ IS ${kpis.div}${"σ"} — TOP DRIVERS`} contributors={kpis.contributors} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+          <TrendChart data={data} dataKey="chEff" label="Chiller efficiency (%)" sub="derived sensor proxy" color={T.blue} modelVal={BASE.chiller.efficiency} modelLabel="Baseline" unit="%" domain={[80, 92]} degrading={false} />
+          <TrendChart data={data} dataKey="chPres" label="Refrigerant pressure" sub="bar" color={T.amber} modelVal={BASE.chiller.pressure} modelLabel="Baseline" unit=" bar" domain={[4.0, 4.6]} degrading={false} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+          <TrendChart data={data} dataKey="chwOut" label="CHW supply (outlet)" sub="°C" color={T.green} modelVal={BASE.chiller.outlet_temp} modelLabel="Baseline" unit="°C" domain={[6.4, 8.4]} degrading={false} />
+          <TrendChart data={data} dataKey="chwIn" label="CHW return (inlet)" sub="°C" color={T.muted} modelVal={BASE.chiller.inlet_temp} modelLabel="Baseline" unit="°C" domain={[11.6, 13.6]} degrading={false} />
+        </div>
+        <DivergenceChart data={data} divColor={divColor} />
+      </div>
+    </div>
+  );
+}
+
+function AhuDetail({ id, sensors, kpis, data, divColor }) {
+  const isLive = !id || id === "AHU-01";
+  const s = sensors;
+  const comfortDelta = Math.round((data[data.length - 1]?.zoneTemp - data[data.length - 1]?.zoneSp) * 10) / 10;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 9 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+        <div style={card({ padding: 12 })}>
+          <span style={SL}>{(id || "AHU-01").toUpperCase()} — AIR-SIDE + COMFORT</span>
+          {!isLive && <div style={{ fontSize: 9, color: T.dim, marginBottom: 8 }}>summary-only unit (demo)</div>}
+          <MetricRow label="Airflow" value={`${s.ahu.airflow} CFM`} sub="supply fan" color={s.ahu.airflow < 3800 ? T.amber : T.text} />
+          <MetricRow label="Fan speed" value={`${s.ahu.fan_rpm} RPM`} sub="should track airflow" />
+          <MetricRow label="Supply air temp" value={`${s.ahu.supply_air_temp}°C`} sub="SAT" />
+          <MetricRow label="Return air temp" value={`${s.ahu.return_air_temp}°C`} sub="RAT" />
+          <MetricRow
+            label="Zone proxy"
+            value={`${(data[data.length - 1]?.zoneTemp ?? 23.6).toFixed(1)}°C`}
+            sub={`setpoint ${(data[data.length - 1]?.zoneSp ?? 23.5).toFixed(1)}°C · Δ ${(comfortDelta >= 0 ? "+" : "")}${comfortDelta}°C`}
+            color={Math.abs(comfortDelta) > 0.8 ? T.amber : T.green}
+          />
+          <div style={{ marginTop: 8, fontSize: 9, color: T.dim }}>
+            Comfort values are demo proxies (not a full zone model).
+          </div>
+        </div>
+
+        <ContributorsCard title={`WHY σ IS ${kpis.div}${"σ"} — TOP DRIVERS`} contributors={kpis.contributors} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+          <TrendChart data={data} dataKey="ahCfm" label="Airflow" sub="CFM" color={T.blue} modelVal={BASE.ahu.airflow} modelLabel="Baseline" unit=" CFM" domain={[3400, 5000]} degrading={false} />
+          <TrendChart data={data} dataKey="ahFan" label="Fan RPM" sub="should be stable" color={T.muted} modelVal={BASE.ahu.fan_rpm} modelLabel="Baseline" unit=" RPM" domain={[1120, 1280]} degrading={false} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+          <TrendChart data={data} dataKey="ahSat" label="Supply air temp" sub="SAT" color={T.green} modelVal={BASE.ahu.supply_air_temp} modelLabel="Baseline" unit="°C" domain={[15.2, 17.6]} degrading={false} />
+          <TrendChart data={data} dataKey="zoneTemp" label="Zone proxy temp" sub="comfort tracking" color={T.amber} modelVal={23.5} modelLabel="Setpoint" unit="°C" domain={[22.2, 25.2]} degrading={false} />
+        </div>
+        <DivergenceChart data={data} divColor={divColor} />
+      </div>
     </div>
   );
 }
