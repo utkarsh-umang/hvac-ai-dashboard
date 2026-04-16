@@ -5,6 +5,18 @@ This repo contains two standalone React demo screens:
 - `hvac-intro.jsx` (Intro)
 - `hvac-digital-twin.jsx` (Digital Twin)
 
+## OpenAI setup (GPT-4o)
+
+This demo calls OpenAI **from a small local API server** so your API key never ships to the browser.
+
+1) Create `.env` from the example:
+
+```bash
+cp .env.example .env
+```
+
+2) Set `OPENAI_API_KEY` in `.env`.
+
 ## Run (local dev)
 
 ```bash

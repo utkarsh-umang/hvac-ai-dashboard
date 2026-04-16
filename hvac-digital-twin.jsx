@@ -149,14 +149,25 @@ export default function App() {
     setAlertLoading(true); setAiAlert(null);
     const fKey = fault;
     const kpis = deriveKPIs(sensorsRef.current, rfRef.current);
-    fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 1000, system: KB,
-        messages: [{ role: "user", content: `Fault: ${FAULTS[fKey].label}\nCOP: ${kpis.cop} vs design 4.1\nPower: ${kpis.pwr}kW vs model 185kW\nDivergence: ${kpis.div} sigma\nTwo sentences only: what is happening and what should the facilities manager do right now?` }],
+        model: "gpt-4o",
+        system: KB,
+        messages: [{
+          role: "user",
+          content:
+            `Fault: ${FAULTS[fKey].label}\n` +
+            `COP: ${kpis.cop} vs design 4.1\n` +
+            `Power: ${kpis.pwr}kW vs model 185kW\n` +
+            `Divergence: ${kpis.div} sigma\n` +
+            `Two sentences only: what is happening and what should the facilities manager do right now?`,
+        }],
       }),
-    }).then(r => r.json())
-      .then(j => { setAiAlert(j.content?.[0]?.text || ""); setAlertLoading(false); })
+    })
+      .then(r => r.json())
+      .then(j => { setAiAlert(j.text || ""); setAlertLoading(false); })
       .catch(() => { setAiAlert("AI analysis unavailable."); setAlertLoading(false); });
   }, [fault]);
 
@@ -170,10 +181,11 @@ export default function App() {
     const kpis = deriveKPIs(sensors, rf);
     const ctx  = `CHL-03 live -- COP: ${kpis.cop}/4.1, Power: ${kpis.pwr}kW vs 185kW model, Fouling Rf: ${rf.toFixed(1)}e-6 (${kpis.rfPct}% of ASHRAE limit), Divergence: ${kpis.div} sigma. Active fault: ${fault ? FAULTS[fault].label : "none"}.`;
     try {
-      const text = await fetch("https://api.anthropic.com/v1/messages", {
+      const text = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514", max_tokens: 1000, system: KB,
+          model: "gpt-4o",
+          system: KB,
           messages: [
             { role: "user",      content: ctx },
             { role: "assistant", content: "Understood - I have all live readings. What would you like to know?" },
@@ -181,7 +193,7 @@ export default function App() {
             userMsg,
           ],
         }),
-      }).then(r => r.json()).then(j => j.content?.[0]?.text || "No response.");
+      }).then(r => r.json()).then(j => j.text || "No response.");
       setMsgs(p => [...p, { role: "assistant", content: text }]);
     } catch { setMsgs(p => [...p, { role: "assistant", content: "Connection error." }]); }
     setChatBusy(false);
